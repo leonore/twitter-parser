@@ -8,4 +8,14 @@ ACCESS_SECRET = access_secret
 
 auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
 auth.set_access_token(ACCESS_TOKEN, ACCESS_SECRET)
-api = tweepy.API(auth)
+api = tweepy.API(auth, parser=tweepy.parsers.JSONParser())
+
+class MyStreamListener(tweepy.StreamListener):
+
+    def on_status(self, status):
+        print(status.text)
+
+listener = MyStreamListener()
+streamer = tweepy.Stream(auth=auth, listener=listener)
+
+streamer.sample()
