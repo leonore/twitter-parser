@@ -15,14 +15,20 @@ ACCESS_SECRET = access_secret
 
 client = MongoClient()
 db = client.twitter_db
-collection = "hybrid_crawler_1601"
+collection = "hybrid_crawler_cov1"
 
 auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
 auth.set_access_token(ACCESS_TOKEN, ACCESS_SECRET)
 api = tweepy.API(auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
 
 count = 0
-LONDON_ID = 44418
+
+LONDON = "51.5287352,-0.3817825,100km"
+GENEVA = "46.204391,6.143158,100km"
+WASHINGTON_DC = "38.907192,-77.036873,100km"
+WUHAN = "30.592850,114.305542,100km"
+locations = [LONDON, GENEVA, WASHINGTON_DC, WUHAN]
+
 hashtag_queue = SetQueue()
 user_queue = SetQueue()
 
@@ -79,15 +85,14 @@ def hashtag_thread():
                 for tweet in tweepy.Cursor(api.search, q=hashtag_queue.get(), lang="en", count=100).items():
                     add_to_database(tweet)
 
-def trend_thread():
-    print("Trend thread started.")
-    london_trends = api.trends_place(LONDON_ID)
-    picked_trends = london_trends[0]['trends'][:10] # only top 10 trends
-    picked_trends = sorted(picked_trends, key=lambda k: k.get('tweet_volume', 0) if k.get('tweet_volume', 0) else 0)
-    for trend in picked_trends:
+def location_thread():
+    print("Location thread started.")
+    location = random.choice(locations)
+    while not stop:
         if available_requests['search'] != 0:
-            for tweet in tweepy.Cursor(api.search, q=trend['name'], lang="en", count=100).items():
+            for tweet in tweepy.Cursor(api.search, q="covid", geocode=location, lang="en", count=100).items():
                 add_to_database(tweet)
+            location = random.choice(locations)
 
 def user_thread():
     print("User thread started.")
@@ -121,14 +126,15 @@ start = datetime.now()
 time_limit = start + timedelta(minutes=60)
 stop = False
 
-streamer.sample(languages=["en"], is_async=True)
+streamer.filter(track=["coronavirus", "covid-19", "covid19", "SARS-COV-2", "SARS-COV2", "2019-nCov"],
+                languages=["en"], is_async=True)
 
 try:
     ut = threading.Thread(target=user_thread, daemon=True)
-    tt = threading.Thread(target=trend_thread, daemon=True)
+    lt = threading.Thread(target=location_thread, daemon=True)
     ht = threading.Thread(target=hashtag_thread, daemon=True)
     ut.start()
-    tt.start()
+    lt.start()
     ht.start()
     print("Probing tweets...\n")
 
