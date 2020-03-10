@@ -1,4 +1,4 @@
 keys.py
 *.pyc
 __pycache__
-.ipnyb_checkpoints
+.ipynb_checkpoints/
