@@ -1,7 +1,21 @@
+import argparse
+
+parser = argparse.ArgumentParser(description='Crawl tweets for one hour and store in a MongoDB.')
+
+parser.add_argument('--database', '-db', action='store', type=str, help='Name of the collection to store the data in', required=True)
+parser.add_argument('--time', '-t', action="store", type=int, help="How long to run the crawler for in minutes", required=False)
+
+args = parser.parse_args()
+collection = args.database
+duration = args.time
+if not duration:
+    duration = 60
+
 import tweepy
 from datetime import datetime, timedelta
 import time
 from pymongo import MongoClient
+from pymongo.errors import DuplicateKeyError
 from keys import consumer_key, consumer_secret, access_token, access_secret
 import random
 
@@ -15,13 +29,13 @@ ACCESS_SECRET = access_secret
 
 client = MongoClient()
 db = client.twitter_db
-collection = "hybrid_crawler_cov1"
 
 auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
 auth.set_access_token(ACCESS_TOKEN, ACCESS_SECRET)
 api = tweepy.API(auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
 
 count = 0
+duplicates = 0
 
 LONDON = "51.5287352,-0.3817825,100km"
 GENEVA = "46.204391,6.143158,100km"
@@ -34,9 +48,13 @@ user_queue = SetQueue()
 
 def add_to_database(status):
     global count
+    global duplicates
     json_tweet = status._json
     json_tweet['created_at'] = datetime.strptime(json_tweet['created_at'], '%a %b %d %H:%M:%S +0000 %Y')
-    db[collection].insert(json_tweet)
+    try:
+        db[collection].insert(json_tweet)
+    except DuplicateKeyError as e:
+        duplicates += 1
     count += 1
 
 def process_network(user):
@@ -45,19 +63,19 @@ def process_network(user):
     # if user has > 15k followers --> get replies
     global user_queue
 
-    seems_legit = True
-    exclude_replies = False
+    seems_legit = False
+    exclude_replies = True
 
     if available_requests['followers'] != 0:
         followers = api.followers_ids(user)
         friends = api.friends_ids(user)
 
-        if len(friends) > 5:
+        if len(friends) > 10:
             seems_legit = True
         else:
             seems_legit = False
 
-        # if user has > 50k followers --> get friends and add to queue
+        # if user has > 15k followers --> get friends and add to queue
         # assume some kind of big name
         if len(followers) >= 15000:
             for friend in friends:
@@ -72,6 +90,7 @@ def parse_for_entities(status):
     global hashtag_queue, user_queue
     user = status.user.id
     user_queue.put(user)
+    # TODO change with get body
     for hashtag in status.entities['hashtags']:
         # add hashtag to list if not there
         hashtag_queue.put(hashtag['text'].lower())
@@ -82,7 +101,7 @@ def hashtag_thread():
     while not stop:
         if not hashtag_queue.empty():
             if available_requests['search'] != 0:
-                for tweet in tweepy.Cursor(api.search, q=hashtag_queue.get(), lang="en", count=100).items():
+                for tweet in tweepy.Cursor(api.search, q=hashtag_queue.get(), lang="en", count=100, tweet_mode='extended').items():
                     add_to_database(tweet)
 
 def location_thread():
@@ -90,7 +109,7 @@ def location_thread():
     location = random.choice(locations)
     while not stop:
         if available_requests['search'] != 0:
-            for tweet in tweepy.Cursor(api.search, q="covid", geocode=location, lang="en", count=100).items():
+            for tweet in tweepy.Cursor(api.search, q="covid", geocode=location, lang="en", count=100, tweet_mode='extended').items():
                 add_to_database(tweet)
             location = random.choice(locations)
 
@@ -104,7 +123,7 @@ def user_thread():
                 user = user_queue.get()
                 seems_legit, replies = process_network(user)
                 if seems_legit:
-                    for tweet in tweepy.Cursor(api.user_timeline, id=user, include_entities=True, exclude_replies=replies, count=200).items():
+                    for tweet in tweepy.Cursor(api.user_timeline, id=user, include_entities=True, exclude_replies=replies, count=100, tweet_mode='extended').items():
                         add_to_database(tweet)
 
 class TwitterStream(tweepy.StreamListener):
@@ -123,11 +142,17 @@ listener = TwitterStream()
 streamer = tweepy.Stream(auth=auth, listener=listener)
 
 start = datetime.now()
-time_limit = start + timedelta(minutes=60)
+time_limit = start + timedelta(minutes=duration)
 stop = False
 
-streamer.filter(track=["coronavirus", "covid-19", "covid19", "SARS-COV-2", "SARS-COV2", "2019-nCov"],
+streamer.filter(track=["coronavirus", "covid-19", "covid19", "SARS-COV-2", "SARS-COV2", "2019-nCov", "covid", "cov19", "SARSCov2"],
                 languages=["en"], is_async=True)
+
+available_requests = {
+    'user_timeline': 0,
+    'search': 0,
+    'followers': 0
+}
 
 try:
     ut = threading.Thread(target=user_thread, daemon=True)
@@ -140,12 +165,6 @@ try:
 
 except Exception as e:
     print("Error encountered when launching threads: {}".format(e))
-
-available_requests = {
-    'user_timeline': 0,
-    'search': 0,
-    'followers': 0
-}
 
 print("Looking for tweets until {}\n".format(time_limit))
 
@@ -172,4 +191,5 @@ while datetime.now() < time_limit:
 stop = True
 
 streamer.disconnect()
-print("{} tweets were streamed from {} to {}".format(count, start, time_limit))
+print("{} tweets were streamed from {} to {} in {}".format(count, start, time_limit, collection))
+print("{} duplicates were detected.".format(duplicates))
