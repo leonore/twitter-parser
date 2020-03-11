@@ -11,6 +11,8 @@ duration = args.time
 if not duration:
     duration = 60
 
+# do imports after argparse
+# imports take time; arguments might be faulty
 import tweepy
 from datetime import datetime, timedelta
 import time
