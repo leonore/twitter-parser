@@ -23,6 +23,7 @@ def find_optimal_size(data, max_k):
         if sse < min_sse:
             min_sse = sse
             optimal_k = k
+            print("Found new optimal K: {}".format(k))
 
     return optimal_k
 
@@ -52,9 +53,11 @@ def topic_extraction(collection, max_topics=100):
 
     df = pd.DataFrame(text.todense()).groupby(clusters).mean()
 
+    top = []
     for i, r in df.iterrows():
         top_words = ', '.join([labels[t] for t in np.argsort(r)[-10:]])
-        print('\nCluster {}: {}'.format(i, top_words))
+        top.append("Cluster {}: {}".format(i, top_words))
+    return top
 
 def sentiment_analysis(collection):
     """
