@@ -42,7 +42,7 @@ one_hour = start + timedelta(minutes=60)
 
 streamer.sample(languages=["en"], is_async=True)
 #streamer.filter(track=["coronavirus", "covid-19", "covid19", "SARS-COV-2", "SARS-COV2", "2019-nCov", "covid", "cov19"],
-                languages=["en"], is_async=True)
+#                languages=["en"], is_async=True)
 
 while datetime.now() < one_hour:
     continue
