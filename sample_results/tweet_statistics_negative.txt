@@ -1,0 +1,6 @@
+Collection: negative
+Total tweets in collection: 1324
+1121 retweets
+344 quotes
+41 replies
+Average character length is: 190

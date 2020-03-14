@@ -1,0 +1,43 @@
+Collection: neutral
+General network
+Number of nodes: 1326
+Number of edges: 1198
+Number of subgraphs: 196
+Average group size: 6
+
+Triads: 7801
+Loops: 17
+Ties: 1198
+Transitive: 105
+
+Retweet network
+Number of nodes: 2413
+Number of edges: 1865
+Number of subgraphs: 564
+Average group size: 4
+
+Triads: 6434
+Loops: 8
+Ties: 1865
+Transitive: 12
+
+Quote network
+Number of nodes: 717
+Number of edges: 513
+Number of subgraphs: 218
+Average group size: 3
+
+Triads: 688
+Loops: 14
+Ties: 513
+Transitive: 46
+
+Hashtag network
+Number of nodes: 625
+Number of edges: 1232
+Number of subgraphs: 201
+Average group size: 3
+
+Triads: 70047
+Loops: 1458
+
