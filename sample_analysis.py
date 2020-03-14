@@ -36,12 +36,14 @@ db = client.twitter_db
 tweets_db = db[collection]
 
 ## TOPIC EXTRACTION -> write to results/topics.txt
-cluster_top_words = topic_extraction(tweets_db.find(), max_k=100) # can change max_k
+print("Running topic extraction -> sample_results/topics.txt")
+cluster_top_words = topic_extraction(tweets_db.find(), 100) # can change number for max_k
 with open('sample_results/topics.txt', 'w') as file:
     for cluster in cluster_top_words:
         file.write(cluster + '\n')
 
 ## SENTIMENT ANALYSIS -> save plot to results/sentiment.png
+print("Running sentiment analysis -> sample_results/sentiment.png")
 scores, ids = sentiment_analysis(tweets_db.find())
 
 # visualisation
@@ -62,18 +64,20 @@ tags = ["all", "negative", "neutral", "positive"]
 
 for idx, condition in enumerate(conditions):
     tag = tags[idx]
+    print("Running Tweet analysis for {} tweets".format(tag))
 
     ## TOP ENTITIES: users, hashtags, mentions, concepts
+    print("-> {}".format('sample_results/top_entities_' + tag + '.txt'))
     m, r, h, c = extract_top_entities(tweets_db, condition)
     entities = ["Top Mentions", "Top Retweets", "Top Hashtags", "Top concepts"]
     with open('sample_results/top_entities_' + tag + '.txt', 'w') as file:
         for name, entity in enumerate([m, r, h, c]):
             file.write(entities[name] + '\n')
-            print(get_top_n_items(entity, n=10))
             file.write(', '.join(get_top_n_items(entity, n=10)))
             file.write('\n\n')
 
     ## NUMBER OF: tweets, retweets, quotes, replies
+    print("-> {}".format('sample_results/tweet_statistics_' + tag + '.txt'))
     n_tweets, n_retweets, n_quotes, n_replies = number_of(tweets_db, condition)
     avg_chars = get_char_count(tweets_db, condition)
     with open('sample_results/tweet_statistics_' + tag + '.txt', 'w') as file:
@@ -85,6 +89,7 @@ for idx, condition in enumerate(conditions):
         file.write("Average character length is: {}".format(avg_chars))
 
     # Build network: get number of nodes, edges, groups
+    print("-> {}".format('sample_results/network_information_' + tag + '.txt'))
     networks = [n for n in user_interaction(tweets_db, condition)] + [hashtag_interaction(tweets_db, condition)]
     graphs = [build_interaction_graph(network) for network in networks]
 

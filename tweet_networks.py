@@ -68,7 +68,7 @@ def hashtag_interaction(collection, condition={"$exists": True}):
     Function to tally up hashtag co-occurence information ("interaction")
     :collection -> MongoDB collection
     """
-    hashtags = set() # we use a set so as to not to repeat lists of hashtags
+    hashtags = []
 
     for tweet in collection.find({"sentiment": condition}):
         tweet = get_body(tweet)
@@ -76,7 +76,9 @@ def hashtag_interaction(collection, condition={"$exists": True}):
             current = []
             for h in tweet["entities"]["hashtags"]:
                 current.append(h["text"].lower()) # capitalisation of hashtags does not matter
-            hashtags.add(sorted(current)) # order of hashtags does not matter
+            current = sorted(current) # order of hashtags does not matter
+            if current not in hashtags: # we don't need repetition of hashtags (this could be changed for tallying up which hashtags are used together)
+                hashtags.append(current)
 
     return hashtags
 
