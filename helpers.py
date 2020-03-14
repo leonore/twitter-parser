@@ -81,4 +81,16 @@ def find_sentiment_tb(tweet):
         score = 1
     else:
         score = -1
-    return scores
+    return score
+
+def get_top_n_items(s, n=10):
+    """
+    Function to return top n items from a paired structure
+    :s -> dictionary, list of tuples
+    :n -> number of items to return
+    """
+
+    if type(s) is dict:
+        return [user + ": " + str(hashtag) for user, hashtag in sorted(s.items(), key=lambda item: item[1], reverse=True)[:n]]
+    else:
+        return [user + ": " + str(hashtag) for user, hashtag in sorted(s, key=lambda item: item[1], reverse=True)[:n]]
