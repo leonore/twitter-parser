@@ -1,7 +1,9 @@
 import networkx as nx
 import itertools
 
-def user_interaction(collection):
+from helpers import get_body
+
+def user_interaction(collection, condition={"$exists": True}):
     """
     Function to tally up user interactions in general tweets, retweets, and quote/replies
     :collection -> MongoDB collection obtained through find()
@@ -10,7 +12,7 @@ def user_interaction(collection):
     rm = {} # retweet mentions
     qm = {} # quote and reply mentions
 
-    for tweet in collection:
+    for tweet in collection.find({"sentiment": condition}):
         tweeter = tweet["user"]["screen_name"]
 
         # RETWEETS
@@ -61,14 +63,14 @@ def user_interaction(collection):
     return nm, rm, qm
 
 
-def hashtag_interaction(collection):
+def hashtag_interaction(collection, condition={"$exists": True}):
     """
     Function to tally up hashtag co-occurence information ("interaction")
-    :collection -> MongoDB collection obtained through find()
+    :collection -> MongoDB collection
     """
     hashtags = []
 
-    for tweet in collection:
+    for tweet in collection.find({"sentiment": condition}):
         tweet = get_body(tweet)
         if tweet["entities"].get("hashtags"):
             current = []
@@ -77,6 +79,23 @@ def hashtag_interaction(collection):
             hashtags.append(sorted(current))
 
     return hashtags
+
+def build_interaction_graph(s):
+    if type(s) is dict:
+        G = nx.DiGraph()
+        for user, friends in s.items():
+            for f, m in friends.items():
+                G.add_edge(user, f, weight=m)
+    else:
+        G = nx.Graph()
+        for ht_list in s:
+            for h1 in ht_list:
+                G.add_node(h1)
+                for h2 in ht_list:
+                    if h1 != h2:
+                        G.add_edge(h1, h2)
+
+    return G
 
 def get_network_information(G):
     """
@@ -88,10 +107,7 @@ def get_network_information(G):
     edges = G.number_of_edges()
     Gu = G.to_undirected()
     ncc = nx.number_connected_components(Gu)
-    print("Number of nodes: {}".format(nodes))
-    print("Number of edges: {}".format(edges))
-    print("Number of subgraphs: {}".format(ncc))
-    print("Average group size: {}".format(nodes//ncc))
+    return nodes, edges, ncc, nodes//ncc
 
 def hashtag_network_statistics(hashtags):
     """
@@ -119,7 +135,7 @@ def hashtag_network_statistics(hashtags):
                                     triads += len(visited_list)-1
                 visited.append(tag_list)
 
-    return ties, triads
+    return triads, ties
 
 def user_network_statistics(users):
     """
@@ -127,7 +143,7 @@ def user_network_statistics(users):
     :users -> dictionary of user connections obtained with user_interaction()
     """
 
-    ties = 0
+    loops = 0
     triads = 0
     transitive = 0
     links = 0
@@ -142,7 +158,7 @@ def user_network_statistics(users):
             if users.get(friend):
                 if users[friend].get(user):
                     if (user, friend) not in visited:
-                        ties += 1
+                        loops += 1
                         transitive += len(users[friend])
                         if len(users[friend]) > 2:
                             triads += sum(1 for ignore in itertools.combinations(users[friend], 3))
@@ -151,5 +167,4 @@ def user_network_statistics(users):
             visited.add((user, friend))
             visited.add((friend, user))
 
-    print("ties", "links", "transitive", "triads")
-    return ties, links, transitive, triads
+    return triads, loops, links, transitive
