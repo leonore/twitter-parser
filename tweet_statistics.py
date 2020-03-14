@@ -5,7 +5,7 @@ from helpers import tokenize, parse_tweet, get_body
 def extract_top_entities(collection, condition={"$exists": True}):
     """
     Extracts number of mentions, retweets, hashtags for a collection
-    As well as top 20 words
+    As well as top 50 words
     :collection -> MongoDB collection obtained with find() or JSON Tweets
     """
     mentions_count = {}
@@ -22,11 +22,11 @@ def extract_top_entities(collection, condition={"$exists": True}):
         if tweet.get("retweeted_status"):
             rt_user = tweet["retweeted_status"]["user"]["screen_name"]
             if not retweets_count.get(rt_user):
-                retweets_count[rt_user] = tweet["retweeted_status"]["retweet_count"]
+                retweets_count[rt_user] = tweet["retweeted_status"]["retweet_count"] # get how many times the tweet has already been retweeted
             else:
-                retweets_count[rt_user] += 1
+                retweets_count[rt_user] += 1 # we have already seen this retweet: tally up another RT for this specific RT
 
-        if tweet.get("truncated"):
+        if tweet.get("truncated"): # if tweet is truncated we need to look through the extended tweet for entities
             tweet = tweet["extended_tweet"]
 
         # USER MENTIONS

@@ -23,8 +23,8 @@ def find_optimal_size(data, max_k):
         if sse < min_sse:
             min_sse = sse
             optimal_k = k
-            print("Found new optimal K: {}".format(k))
 
+    print("Found optimal K: {}".format(optimal_k))
     return optimal_k
 
 def topic_extraction(collection, max_topics=100):
@@ -37,7 +37,7 @@ def topic_extraction(collection, max_topics=100):
     for tweet in collection:
         corpus.append(tokenize(parse_tweet(tweet)))
 
-    tfidf = TfidfVectorizer(
+    tfidf = TfidfVectorizer( # parameters can be changed
         min_df = 5,
         max_df = 0.95,
         max_features = 8000,
@@ -75,7 +75,7 @@ def sentiment_analysis(collection):
 
     scores = np.array(scores)
     ids = np.array(ids)
-    
+
     return scores, ids
 
 def add_sentiment_to_db(scores, ids, collection):
@@ -87,4 +87,5 @@ def add_sentiment_to_db(scores, ids, collection):
 
     for tid, score in zip(ids, scores):
         u = collection.update_one({"_id" : tid}, {"$set": {"sentiment": int(score)}})
+        
     assert collection.count({"sentiment": {"$exists": True}}) == len(ids)
