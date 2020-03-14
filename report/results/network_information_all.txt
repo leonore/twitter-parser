@@ -1,0 +1,46 @@
+Collection: all
+General network
+Number of nodes: 94674
+Number of edges: 149895
+Number of subgraphs: 3271
+Average group size: 28
+
+Triads: 12469969749
+Loops: 901
+Ties: 149895
+Transitive: 44064
+
+Collection: all
+Retweet network
+Number of nodes: 224080
+Number of edges: 295851
+Number of subgraphs: 6816
+Average group size: 32
+
+Triads: 34411381510
+Loops: 786
+Ties: 295851
+Transitive: 37980
+
+Collection: all
+Quote network
+Number of nodes: 73360
+Number of edges: 81112
+Number of subgraphs: 5516
+Average group size: 13
+
+Triads: 2085989560
+Loops: 1434
+Ties: 81112
+Transitive: 23076
+
+Collection: all
+Hashtag network
+Number of nodes: 35794
+Number of edges: 110196
+Number of subgraphs: 10227
+Average group size: 3
+
+Triads: 357947986
+Loops: 169099
+

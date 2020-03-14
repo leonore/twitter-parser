@@ -78,4 +78,4 @@ This suite of analysis functions could be more modular. At the moment if you wan
 * Sentiment analysis could be extended to take into account the subjectivity of Tweets. A more objective Tweet might help us find accounts of higher "trust factor" to relay important information.
 * Right now the top 10 entities are extracted but this can be changed too.
 * Analysis gets exponentially slower as the size of the data grows larger. This needs improvement.
-* Visualisation tools could be improved too. Graphs built with `get_network_information()` in `tweet_networks.py` can be exported to be read by [Gephi](https://gephi.org) using `nx.write_gexf(G, '[file].gexf')`. Gephi struggles a bit with large networks, but the best layout seems to be Force Atlas 2.  
+* Visualisation tools could be improved too. Graphs built with `get_network_information()` in `tweet_networks.py` can be exported to be read by [Gephi](https://gephi.org) using `nx.write_gexf(G, '[file].gexf')`. Gephi struggles a bit with large networks, but the best layout seems to be Force Atlas 2 followed by Label Adjust.  
