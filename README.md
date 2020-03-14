@@ -3,6 +3,9 @@
 
 The code of this repository was developed for an assessment as part of the **Web Science (H) course at the University of Glasgow**. The aim was to develop a Tweet crawler and to analyse the obtained Tweets. The software developed works on any collection of Tweets, but the topic of the coronavirus outbreak was picked out of curiosity.
 
+#### Skip to [Recap](#recap) for TL;DR
+
+
 The following information was extracted from the collection of tweets:
 * The number of different types of tweets: retweets, quotes, replies.
 * The most retweeted users, the most mentioned users, the most used hashtags, the most reoccurring concepts.

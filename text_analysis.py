@@ -75,12 +75,8 @@ def sentiment_analysis(collection):
 
     scores = np.array(scores)
     ids = np.array(ids)
-
-    negative = scores[scores==-1]
-    neutral = scores[scores==0]
-    positive = scores[scores==1]
-
-    return (negative, neutral, positive), ids
+    
+    return scores, ids
 
 def add_sentiment_to_db(scores, ids, collection):
     """

@@ -7,3 +7,4 @@ matplotlib
 pandas
 networkx
 emoji
+sklearn
