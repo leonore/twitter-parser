@@ -5,36 +5,33 @@ Number of edges: 50874
 Number of subgraphs: 1480
 Average group size: 22
 
-Triads: 818662040
+Triads: 3001062
 Loops: 252
 Ties: 50874
 Transitive: 10472
 
-Collection: positive
 Retweet network
 Number of nodes: 65924
 Number of edges: 74068
 Number of subgraphs: 3087
 Average group size: 21
 
-Triads: 910288075
+Triads: 5751713
 Loops: 201
 Ties: 74068
 Transitive: 6739
 
-Collection: positive
 Quote network
 Number of nodes: 21562
 Number of edges: 20630
 Number of subgraphs: 2461
 Average group size: 8
 
-Triads: 77162457
+Triads: 613423
 Loops: 417
 Ties: 20630
 Transitive: 6077
 
-Collection: positive
 Hashtag network
 Number of nodes: 13614
 Number of edges: 33854
@@ -42,5 +39,5 @@ Number of subgraphs: 4179
 Average group size: 3
 
 Triads: 25406212
-Loops: 44327
+Ties: 44327
 
