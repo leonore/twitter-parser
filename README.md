@@ -18,6 +18,10 @@ Details on software development and findings are reported in `report/report.pdf`
 
 ### Running the software
 
+```
+git clone https://github.com/leonore/twitter-parser.git
+```
+
 #### Requirements
 
 Please use Python3.
